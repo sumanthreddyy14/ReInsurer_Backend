@@ -1,0 +1,23 @@
+use backenddb;
+-- Reinsurers first (numeric ID auto, we set external string ID)
+INSERT INTO reinsurer (name, contact_info, reinsurer_id) VALUES ('Swiss Re', 'swissre@example.com', 'R001');
+INSERT INTO reinsurer (name, contact_info, reinsurer_id) VALUES ('Munich Re', 'munichre@example.com', 'R002');
+INSERT INTO reinsurer (name, contact_info, reinsurer_id) VALUES ('Hannover Re', 'hannoverre@example.com', 'R003');
+
+-- Treaties (use FK to reinsurer numeric IDs: 1,2,3 in order)
+-- id auto, we set external treaty_id as "Txxx"
+INSERT INTO treaty (reinsurer_fk, treaty_type, coverage_limit, start_date, end_date, status, renewal_date, treaty_id)
+VALUES (1, 'PROPORTIONAL',      5000000, '2025-01-01', '2026-01-31', 'ACTIVE',  '2025-12-15', 'T001');
+
+INSERT INTO treaty (reinsurer_fk, treaty_type, coverage_limit, start_date, end_date, status, renewal_date, treaty_id)
+VALUES (2, 'NON_PROPORTIONAL',  3000000, '2024-01-01', '2024-12-31', 'EXPIRED', '2026-01-15', 'T002');
+
+INSERT INTO treaty (reinsurer_fk, treaty_type, coverage_limit, start_date, end_date, status, renewal_date, treaty_id)
+VALUES (3, 'PROPORTIONAL',      7000000, '2023-01-01', '2023-12-31', 'EXPIRED', '2024-10-15', 'T003');
+
+INSERT INTO treaty (reinsurer_fk, treaty_type, coverage_limit, start_date, end_date, status, renewal_date, treaty_id)
+VALUES (3, 'PROPORTIONAL',      5000000, '2023-01-01', '2023-12-31', 'ARCHIVED','2024-10-15', 'T004');
+
+INSERT INTO treaty (reinsurer_fk, treaty_type, coverage_limit, start_date, end_date, status, renewal_date, treaty_id)
+VALUES (1, 'PROPORTIONAL',     80000000, '2025-01-01', '2026-01-31', 'ACTIVE',  '2026-01-15', 'T005');
+
