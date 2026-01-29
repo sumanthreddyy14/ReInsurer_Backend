@@ -21,3 +21,21 @@ VALUES (3, 'PROPORTIONAL',      5000000, '2023-01-01', '2023-12-31', 'ARCHIVED',
 INSERT INTO treaty (reinsurer_fk, treaty_type, coverage_limit, start_date, end_date, status, renewal_date, treaty_id)
 VALUES (1, 'PROPORTIONAL',     80000000, '2025-01-01', '2026-01-31', 'ACTIVE',  '2026-01-15', 'T005');
 
+For risk Cession
+
+INSERT INTO POLICY (policy_id, premium) VALUES ('P1001', 12000);
+INSERT INTO POLICY (policy_id, premium) VALUES ('P1002', 8000);
+INSERT INTO POLICY (policy_id, premium) VALUES ('P1003', 15000);
+
+-- Initial cessions (optional; you can also create them via POST)
+INSERT INTO RISK_CESSION (cession_id, treaty_id, policy_id, ceded_percentage, ceded_premium, commission, created_at, created_by)
+VALUES ('C0001', 'T001', 'P1001', 50, 6000, 600, CURRENT_TIMESTAMP, 'admin');
+
+INSERT INTO RISK_CESSION (cession_id, treaty_id, policy_id, ceded_percentage, ceded_premium, commission, created_at, created_by)
+VALUES ('C0002', 'T002', 'P1002', 40, 3200, 320, CURRENT_TIMESTAMP, 'admin');
+
+INSERT INTO AUDIT_LOG (cession_id, timestamp, action, user)
+VALUES ('C0001', CURRENT_TIMESTAMP, 'Initial allocation of 50% to Treaty T001', 'admin');
+
+INSERT INTO AUDIT_LOG (cession_id, timestamp, action, user)
+VALUES ('C0002', CURRENT_TIMESTAMP, 'Initial allocation of 40% to Treaty T002', 'admin');
