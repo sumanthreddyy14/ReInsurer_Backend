@@ -37,7 +37,6 @@ public class TreatyService {
         return toUi(t);
     }
 
-
     public TreatyUiDTO create(TreatyUiDTO dto) {
         Reinsurer reinsurer = reinsurerRepo.findByReinsurerId(dto.getReinsurerId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Reinsurer not found: " + dto.getReinsurerId()));
