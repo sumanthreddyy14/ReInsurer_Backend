@@ -51,6 +51,7 @@ public class SecurityConfig {
                         // NOTE: If you want to PROTECT your data endpoints, remove or restrict the line below.
                         // Currently, this allows ANYONE to see your GET data without a token.
                         // If you want data to be secure, change permitAll() to authenticated() for GETs.
+                        .requestMatchers(HttpMethod.POST, "/api/v1/recoveries/generate-from-cessions").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
                         .anyRequest().authenticated()
                 )

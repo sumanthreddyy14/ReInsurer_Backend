@@ -3,6 +3,7 @@ package com.cts.backend.finance.repository;
 import com.cts.backend.finance.entity.Recovery;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -22,4 +23,19 @@ public interface RecoveryRepository extends JpaRepository<Recovery, Long> {
     // Sum of all completed recoveries in the system (for the Dashboard Summary)
     @Query("SELECT SUM(r.recoveryAmount) FROM Recovery r WHERE r.status = 'COMPLETED'")
     Double sumAllCompleted();
+
+    List<Recovery> findByStatus(Recovery.RecoveryStatus status);
+    long countByStatus(Recovery.RecoveryStatus status);
+
+
+    @Query("SELECT r FROM Recovery r " +
+            "WHERE (:treatyId IS NULL OR r.treatyId = :treatyId) " +
+            "AND (:status IS NULL OR r.status = :status)")
+    List<Recovery> search(
+            @Param("treatyId") String treatyId,
+            @Param("status") Recovery.RecoveryStatus status
+    );
+
+
+
 }
