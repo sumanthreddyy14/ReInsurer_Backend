@@ -46,17 +46,40 @@ public class FinanceService {
      * 2. PAGE 1: Balance Table (All Treaties)
      */
     public List<BalanceRowDTO> getAllTreatyBalances() {
-        return treatyRepo.findAll().stream().map(t -> {
-            Double p = clean(cessionRepo.sumPremiumByTreatyId(t.getTreatyId()));
-            Double r = clean(recoveryRepo.sumCompletedByTreatyId(t.getTreatyId()));
-            return BalanceRowDTO.builder()
-                    .key(t.getTreatyId())
-                    .label(t.getTreatyId())
-                    .cededPremiums(p)
-                    .recoveries(r)
-                    .outstandingBalance(clean(p - r))
-                    .build();
-        }).collect(Collectors.toList());
+        // 1. Fetch all treaties from the DB
+        List<Treaty> allTreaties = treatyRepo.findAll();
+
+        // 2. Group treaties by Reinsurer ID
+        return allTreaties.stream()
+                .filter(t -> t.getReinsurer() != null) // Safety check
+                .collect(Collectors.groupingBy(t -> t.getReinsurer().getReinsurerId()))
+                .entrySet().stream()
+                .map(entry -> {
+                    String reinsurerId = entry.getKey();
+                    List<Treaty> group = entry.getValue();
+
+                    // 3. Calculate cumulative totals for this Reinsurer
+                    double totalPremium = 0.0;
+                    double totalRecoveries = 0.0;
+                    List<String> treatyIds = new ArrayList<>();
+
+                    for (Treaty t : group) {
+                        totalPremium += clean(cessionRepo.sumPremiumByTreatyId(t.getTreatyId()));
+                        totalRecoveries += clean(recoveryRepo.sumCompletedByTreatyId(t.getTreatyId()));
+                        treatyIds.add(t.getTreatyId()); // Collect IDs for Column 5
+                    }
+
+                    // 4. Map to DTO with grouped data
+                    return BalanceRowDTO.builder()
+                            .key(reinsurerId)
+                            .label(reinsurerId) // Column 1: Reinsurer ID
+                            .cededPremiums(clean(totalPremium)) // Column 2
+                            .recoveries(clean(totalRecoveries)) // Column 3
+                            .outstandingBalance(clean(totalPremium - totalRecoveries)) // Column 4
+                            .treaties(treatyIds) // Column 5: List of Treaty IDs
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
     /**
