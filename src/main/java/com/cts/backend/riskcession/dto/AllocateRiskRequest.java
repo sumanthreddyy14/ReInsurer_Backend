@@ -7,7 +7,10 @@ import jakarta.validation.constraints.*;
 @Getter @Setter
 public class AllocateRiskRequest {
 
+    @NotNull
     private String treatyId;
+    
+    @NotNull
     private String policyId;
 
     @Min(0)
