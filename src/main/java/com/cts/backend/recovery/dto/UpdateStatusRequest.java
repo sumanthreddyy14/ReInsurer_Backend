@@ -1,4 +1,4 @@
-package com.cts.backend.finance.dto;
+package com.cts.backend.recovery.dto;
 
 import lombok.Data;
 import jakarta.validation.constraints.NotBlank;

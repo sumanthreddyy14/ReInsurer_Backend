@@ -1,7 +1,10 @@
-package com.cts.backend.finance.controller;
+package com.cts.backend.recovery.controller;
 
-import com.cts.backend.finance.dto.*;
-import com.cts.backend.finance.service.RecoveryService;
+import com.cts.backend.recovery.service.RecoveryService;
+import com.cts.backend.recovery.dto.CreateRecoveryRequest;
+import com.cts.backend.recovery.dto.RecoveryUiDTO;
+import com.cts.backend.recovery.dto.UpdateRecoveryRequest;
+import com.cts.backend.recovery.dto.UpdateStatusRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -60,7 +63,7 @@ public class RecoveryController {
         return service.generateFromAllCessions();
     }
 
-    // com.cts.backend.finance.controller.RecoveryController.java
+    // com.cts.backend.recovery.controller.RecoveryController.java
 
     @GetMapping("/get/{recoveryId}")
     public RecoveryUiDTO get1(@PathVariable String recoveryId) {

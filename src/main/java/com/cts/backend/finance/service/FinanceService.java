@@ -3,7 +3,7 @@ package com.cts.backend.finance.service;
 import com.cts.backend.finance.dto.BalanceRowDTO;
 import com.cts.backend.finance.dto.FinanceSummaryDTO;
 
-import com.cts.backend.finance.repository.RecoveryRepository;
+import com.cts.backend.recovery.repository.RecoveryRepository;
 import com.cts.backend.riskcession.repository.RiskCessionRepository;
 import com.cts.backend.treaty.entity.Treaty;
 import com.cts.backend.treaty.repositories.ReinsurerRepository;

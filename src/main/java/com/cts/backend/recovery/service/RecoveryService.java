@@ -1,8 +1,11 @@
-package com.cts.backend.finance.service;
+package com.cts.backend.recovery.service;
 
-import com.cts.backend.finance.dto.*;
-import com.cts.backend.finance.entity.Recovery;
-import com.cts.backend.finance.repository.RecoveryRepository;
+import com.cts.backend.recovery.dto.CreateRecoveryRequest;
+import com.cts.backend.recovery.dto.RecoveryUiDTO;
+import com.cts.backend.recovery.dto.UpdateRecoveryRequest;
+import com.cts.backend.recovery.dto.UpdateStatusRequest;
+import com.cts.backend.recovery.entity.Recovery;
+import com.cts.backend.recovery.repository.RecoveryRepository;
 import com.cts.backend.riskcession.entity.RiskCession;
 import com.cts.backend.riskcession.repository.PolicyRepository;
 import com.cts.backend.riskcession.repository.RiskCessionRepository;

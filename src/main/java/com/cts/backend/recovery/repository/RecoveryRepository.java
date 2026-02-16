@@ -1,6 +1,6 @@
-package com.cts.backend.finance.repository;
+package com.cts.backend.recovery.repository;
 
-import com.cts.backend.finance.entity.Recovery;
+import com.cts.backend.recovery.entity.Recovery;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

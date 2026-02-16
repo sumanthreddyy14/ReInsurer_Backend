@@ -1,4 +1,4 @@
-package com.cts.backend.finance.entity;
+package com.cts.backend.recovery.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
