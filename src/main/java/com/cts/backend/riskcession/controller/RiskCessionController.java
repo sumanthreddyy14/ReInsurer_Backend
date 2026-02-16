@@ -34,7 +34,7 @@ public class RiskCessionController {
     }
 
     @PostMapping("/allocate")
-    public RiskCession allocate(@RequestBody AllocateRiskRequest req) {
+    public RiskCession allocate(@RequestBody @jakarta.validation.Valid AllocateRiskRequest req) {
         return service.allocate(req);
     }
 }
