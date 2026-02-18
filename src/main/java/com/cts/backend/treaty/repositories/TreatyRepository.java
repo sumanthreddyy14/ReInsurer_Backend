@@ -29,4 +29,6 @@ public interface TreatyRepository extends JpaRepository<Treaty, Long> {
             @Param("statuses") List<Treaty.TreatyStatus> statuses
     );
 
+
+    long countByStatus(Treaty.TreatyStatus status);
 }

@@ -1,6 +1,7 @@
 package com.cts.backend.finance.service;
 
 import com.cts.backend.finance.dto.BalanceRowDTO;
+import com.cts.backend.finance.dto.FinanceReportDTO;
 import com.cts.backend.finance.dto.FinanceSummaryDTO;
 
 import com.cts.backend.recovery.repository.RecoveryRepository;
@@ -15,9 +16,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +35,16 @@ public class FinanceService {
         return value == null ? 0.0 : Math.round(value * 100.0) / 100.0;
     }
 
+
+    private Instant parseFrom(String from) {
+        if (from == null || from.isBlank()) return null;
+        return LocalDate.parse(from).atStartOfDay(ZoneOffset.UTC).toInstant();
+    }
+    private Instant parseTo(String to) {
+        if (to == null || to.isBlank()) return null;
+        // inclusive end-of-day
+        return LocalDate.parse(to).plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant().minusMillis(1);
+    }
     /**
      * 1. PAGE 1: Cumulative Summary (Top Cards)
      */
@@ -182,6 +194,28 @@ public class FinanceService {
         return sb.toString();
     }
 
+//    @GetMapping("/report") // This is the endpoint the UI is looking for
+//    public ResponseEntity<?> getReportData(
+//            @RequestParam(required = false) String tId,
+//            @RequestParam(required = false) String rId) {
+//        try {
+//            // Reuse your logic to get the List of BalanceRowDTO
+//            List<BalanceRowDTO> data = getDataForReport(tId, rId);
+//
+//            // Return as JSON for the Angular table
+//            return ResponseEntity.ok(data);
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+//        }
+//    }
+
+
+
+
+
+
+
+
     @GetMapping("/report") // This is the endpoint the UI is looking for
     public ResponseEntity<?> getReportData(
             @RequestParam(required = false) String tId,
@@ -195,5 +229,91 @@ public class FinanceService {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
+
     }
+
+    // ---------- Filtered Summary ----------
+    public FinanceSummaryDTO getCumulativeSummaryFiltered(String from, String to) {
+        Instant f = parseFrom(from);
+        Instant t = parseTo(to);
+
+        Double p = clean(cessionRepo.sumPremiumFiltered(null, f, t));
+        Double r = clean(recoveryRepo.sumCompletedFiltered(null, f, t));
+        return new FinanceSummaryDTO(p, r, clean(p - r));
+    }
+
+    // ---------- Filtered Balance Table ----------
+    public List<BalanceRowDTO> getBalances(String groupBy, String from, String to) {
+        Instant f = parseFrom(from);
+        Instant t = parseTo(to);
+
+        if ("reinsurer".equalsIgnoreCase(groupBy)) {
+            // group across treaties per reinsurer
+            Map<String, List<Treaty>> byR = treatyRepo.findAll().stream()
+                    .collect(Collectors.groupingBy(t1 -> t1.getReinsurer().getReinsurerId()));
+            List<BalanceRowDTO> rows = new ArrayList<>();
+            for (Map.Entry<String, List<Treaty>> e : byR.entrySet()) {
+                String reinsurerId = e.getKey();
+                List<Treaty> ts = e.getValue();
+
+                double p = 0.0;
+                double r = 0.0;
+                List<String> treaties = new ArrayList<>();
+                for (Treaty tty : ts) {
+                    Double ct = clean(cessionRepo.sumPremiumFiltered(tty.getTreatyId(), f, t));
+                    Double rt = clean(recoveryRepo.sumCompletedFiltered(tty.getTreatyId(), f, t));
+                    p += ct;
+                    r += rt;
+                    treaties.add(tty.getTreatyId());
+                }
+                rows.add(BalanceRowDTO.builder()
+                        .key(reinsurerId)
+                        .label(reinsurerRepo.findByReinsurerId(reinsurerId).map(rn -> rn.getName()).orElse(reinsurerId))
+                        .cededPremiums(clean(p))
+                        .recoveries(clean(r))
+                        .outstandingBalance(clean(p - r))
+                        .treaties(treaties)
+                        .build());
+            }
+            return rows;
+        }
+
+        // default: treaty grouping
+        return treatyRepo.findAll().stream().map(t2 -> {
+            Double p = clean(cessionRepo.sumPremiumFiltered(t2.getTreatyId(), f, t));
+            Double r = clean(recoveryRepo.sumCompletedFiltered(t2.getTreatyId(), f, t));
+            return BalanceRowDTO.builder()
+                    .key(t2.getTreatyId())
+                    .label(t2.getTreatyId())
+                    .cededPremiums(p)
+                    .recoveries(r)
+                    .outstandingBalance(clean(p - r))
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
+    // ---------- Reports (computed on the fly) ----------
+    public List<FinanceReportDTO> listReports(String from, String to) {
+        Instant f = parseFrom(from);
+        Instant t = parseTo(to);
+        // Here we return 1 computed report (you can expand to history later)
+        FinanceSummaryDTO metrics = getCumulativeSummaryFiltered(from, to);
+        Map<String, FinanceSummaryDTO> byTreaty = new LinkedHashMap<>();
+        for (Treaty tty : treatyRepo.findAll().stream()
+                .sorted(Comparator.comparing(Treaty::getTreatyId)).toList()) {
+
+            Double p = clean(cessionRepo.sumPremiumFiltered(tty.getTreatyId(), f, t));
+            Double r = clean(recoveryRepo.sumCompletedFiltered(tty.getTreatyId(), f, t));
+            byTreaty.put(tty.getTreatyId(), new FinanceSummaryDTO(p, r, clean(p - r)));
+        }
+        FinanceReportDTO report = new FinanceReportDTO();
+        report.setReportId("FR-" + System.currentTimeMillis());
+        report.setGeneratedDate(java.time.ZonedDateTime.now(ZoneOffset.UTC).toString());
+        report.setMetrics(metrics);
+        report.setBreakdownByTreaty(byTreaty);
+        return List.of(report);
+    }
+
+
+
 }

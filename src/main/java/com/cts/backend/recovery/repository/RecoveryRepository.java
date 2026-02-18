@@ -37,5 +37,17 @@ public interface RecoveryRepository extends JpaRepository<Recovery, Long> {
     );
 
 
+    @Query("""
+           SELECT SUM(r.recoveryAmount) 
+             FROM Recovery r
+            WHERE r.status = 'COMPLETED'
+              AND (:treatyId IS NULL OR r.treatyId = :treatyId)
+              AND (:from IS NULL OR r.recoveryDate >= :from)
+              AND (:to   IS NULL OR r.recoveryDate <= :to)
+           """)
+    Double sumCompletedFiltered(@Param("treatyId") String treatyId,
+                                @Param("from") java.time.Instant from,
+                                @Param("to") java.time.Instant to);
+
 
 }
