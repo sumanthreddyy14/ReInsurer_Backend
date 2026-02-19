@@ -35,7 +35,6 @@ public class FinanceService {
         return value == null ? 0.0 : Math.round(value * 100.0) / 100.0;
     }
 
-
     private Instant parseFrom(String from) {
         if (from == null || from.isBlank()) return null;
         return LocalDate.parse(from).atStartOfDay(ZoneOffset.UTC).toInstant();
@@ -45,18 +44,15 @@ public class FinanceService {
         // inclusive end-of-day
         return LocalDate.parse(to).plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant().minusMillis(1);
     }
-    /**
-     * 1. PAGE 1: Cumulative Summary (Top Cards)
-     */
+
+    // 1. PAGE 1: Cumulative Summary (Top Cards)
     public FinanceSummaryDTO getCumulativeSummary() {
         Double p = clean(cessionRepo.sumAllPremium());
         Double r = clean(recoveryRepo.sumAllCompleted());
         return new FinanceSummaryDTO(p, r, clean(p - r));
     }
 
-    /**
-     * 2. PAGE 1: Balance Table (All Treaties)
-     */
+    // 2. PAGE 1: Balance Table (All Treaties)
     public List<BalanceRowDTO> getAllTreatyBalances() {
         // 1. Fetch all treaties from the DB
         List<Treaty> allTreaties = treatyRepo.findAll();
@@ -94,10 +90,7 @@ public class FinanceService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 3. PAGE 2: Search and Validate (For Treaty or Reinsurer)
-     * Returns a list of rows to be converted to CSV
-     */
+    // 3. PAGE 2: Search and Validate (For Treaty or Reinsurer)
     public List<BalanceRowDTO> getDataForReport(String tId, String rId) throws Exception {
         List<BalanceRowDTO> results = new ArrayList<>();
 
@@ -138,9 +131,7 @@ public class FinanceService {
                 .build();
     }
 
-    /**
-     * 3 (Continued). CSV Generator
-     */
+    // CSV Generator
     public String generateCSV(List<BalanceRowDTO> rows) {
         // 1. Add a Report Header for a "Classic" look
         StringBuilder sb = new StringBuilder();
@@ -150,14 +141,12 @@ public class FinanceService {
 
         // 2. Column Headers
         sb.append("Treaty ID,Reinsurer,Type,Status,Coverage Limit,Ceded Premium,Recoveries,Outstanding Balance\n");
-
         Double totalP = 0.0;
         Double totalR = 0.0;
         Double totalB = 0.0;
 
         for (BalanceRowDTO row : rows) {
             Optional<Treaty> treatyOpt = treatyRepo.findByTreatyId(row.getKey());
-
             String reinsurerName = "N/A";
             String type = "N/A";
             String status = "N/A";
@@ -194,28 +183,6 @@ public class FinanceService {
         return sb.toString();
     }
 
-//    @GetMapping("/report") // This is the endpoint the UI is looking for
-//    public ResponseEntity<?> getReportData(
-//            @RequestParam(required = false) String tId,
-//            @RequestParam(required = false) String rId) {
-//        try {
-//            // Reuse your logic to get the List of BalanceRowDTO
-//            List<BalanceRowDTO> data = getDataForReport(tId, rId);
-//
-//            // Return as JSON for the Angular table
-//            return ResponseEntity.ok(data);
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-//        }
-//    }
-
-
-
-
-
-
-
-
     @GetMapping("/report") // This is the endpoint the UI is looking for
     public ResponseEntity<?> getReportData(
             @RequestParam(required = false) String tId,
@@ -223,13 +190,11 @@ public class FinanceService {
         try {
             // Reuse your logic to get the List of BalanceRowDTO
             List<BalanceRowDTO> data = getDataForReport(tId, rId);
-
             // Return as JSON for the Angular table
             return ResponseEntity.ok(data);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
-
     }
 
     // ---------- Filtered Summary ----------
@@ -255,7 +220,6 @@ public class FinanceService {
             for (Map.Entry<String, List<Treaty>> e : byR.entrySet()) {
                 String reinsurerId = e.getKey();
                 List<Treaty> ts = e.getValue();
-
                 double p = 0.0;
                 double r = 0.0;
                 List<String> treaties = new ArrayList<>();
@@ -313,7 +277,4 @@ public class FinanceService {
         report.setBreakdownByTreaty(byTreaty);
         return List.of(report);
     }
-
-
-
 }

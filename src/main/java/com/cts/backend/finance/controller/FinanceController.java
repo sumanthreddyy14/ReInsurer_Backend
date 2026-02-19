@@ -24,35 +24,24 @@ public class FinanceController {
     private final FinanceService financeService;
     private final RecoveryService recoveryService;
 
-    /**
-     * PAGE 1: Top Cards
-     * GET http://localhost:8080/api/v1/finance/summary
-     */
+    //PAGE 1: Top Cards
     @GetMapping("/summary")
     public FinanceSummaryDTO getSummary() {
         return financeService.getCumulativeSummary();
     }
 
-    /**
-     * PAGE 1: Balance Table
-     * GET http://localhost:8080/api/v1/finance/balances
-     */
+    //PAGE 1: Balance Table
     @GetMapping("/balances")
     public List<BalanceRowDTO> getBalances() {
         // Returns the list of all individual treaties for the table
         return financeService.getAllTreatyBalances();
     }
 
-    /**
-     * PAGE 2: Report Search & Download
-     * This endpoint handles both Treaty ID and Reinsurer ID via Query Params
-     * GET http://localhost:8080/api/v1/finance/report/export?tId=T001
-     */
+    // PAGE 2: Report Search & Download
     @GetMapping("/report/export")
     public ResponseEntity<?> exportReport(
             @RequestParam(required = false) String tId,
             @RequestParam(required = false) String rId) {
-
         try {
             // 1. Get the data (This validates if ID exists)
             List<BalanceRowDTO> data = financeService.getDataForReport(tId, rId);
@@ -119,6 +108,4 @@ public class FinanceController {
                                               @RequestParam(required = false) String status) {
         return recoveryService.list(treatyId, status);
     }
-
-
 }
