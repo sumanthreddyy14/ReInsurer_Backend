@@ -10,4 +10,21 @@ public class Policy {
     @Id
     private String policyId;
     private double premium;
+
+    public String getPolicyId() {
+        return policyId;
+    }
+
+    public void setPolicyId(String policyId) {
+        this.policyId = policyId;
+    }
+
+    public double getPremium() {
+        return premium;
+    }
+
+    public void setPremium(double premium) {
+        this.premium = premium;
+    }
+
 }
