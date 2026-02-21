@@ -9,9 +9,9 @@ import java.util.List;
 @Builder
 public class BalanceRowDTO {
     private String key;                // treatyId or reinsurerId
-    private String label;              // Name to display
+    private String label;
     private Double cededPremiums;
     private Double recoveries;
     private Double outstandingBalance;
-    private List<String> treaties;     // For reinsurer grouping
+    private List<String> treaties;
 }

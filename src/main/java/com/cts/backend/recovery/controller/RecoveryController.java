@@ -19,6 +19,12 @@ public class RecoveryController {
 
     private final RecoveryService service;
 
+    @GetMapping("/recoveries")
+    public List<RecoveryUiDTO> listRecoveries(@RequestParam(required = false) String treatyId,
+                                              @RequestParam(required = false) String status) {
+        return list(treatyId, status);
+    }
+
     // List with optional filters: ?treatyId=T001&status=PENDING
     @GetMapping
     public List<RecoveryUiDTO> list(
