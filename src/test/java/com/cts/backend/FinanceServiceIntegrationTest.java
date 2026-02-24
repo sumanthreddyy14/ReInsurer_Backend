@@ -93,7 +93,7 @@ class FinanceServiceIntegrationTest {
         String today = LocalDate.now().toString();
         String tomorrow = LocalDate.now().plusDays(1).toString();
 
-        FinanceSummaryDTO summary = financeService.getCumulativeSummaryFiltered(today, tomorrow);
+        FinanceSummaryDTO summary = financeService.getCumulativeSummary();
 
         // Assert: Now it should ignore the other 16,030.0 already in your DB
         assertEquals(1500.0, summary.getCededPremiums(), 0.01);
@@ -123,10 +123,10 @@ class FinanceServiceIntegrationTest {
         String today = LocalDate.now().toString();
         String tomorrow = LocalDate.now().plusDays(1).toString();
 
-        FinanceSummaryDTO summary = financeService.getCumulativeSummaryFiltered(today, tomorrow);
+        FinanceSummaryDTO summary = financeService.getCumulativeSummary();
         assertEquals(1500.0, summary.getCededPremiums());
 
-        FinanceSummaryDTO emptySummary = financeService.getCumulativeSummaryFiltered("2000-01-01", "2000-01-02");
+        FinanceSummaryDTO emptySummary = financeService.getCumulativeSummary();
         assertEquals(0.0, emptySummary.getCededPremiums());
     }
 
